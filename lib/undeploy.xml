@@ -64,7 +64,7 @@
 <target name="parkUsers">
 
  <property name="park.users"><![CDATA[
-Profile p = [select Id FROM Profile WHERE Name = 'Standard user'];
+Profile p = [select Id FROM Profile WHERE Name = 'Standard User'];
 List<User> uL = [select Id from User where Profile.Name like '${undeploy.profilePattern}%'];
 for (User u : uL)
 {
@@ -535,6 +535,8 @@ update uL;]]>
         if( filename == 'Global-Global Layout.layout' )
     		continue;
         if( filename == 'FeedItem-Feed Item Layout.layout' )
+			continue;
+		if( filename == 'FeedItem-Feedeintrag-Layout.layout' )
 			continue;
 
         var file = new File(basedir, filename);
