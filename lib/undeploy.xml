@@ -297,7 +297,6 @@ update uL;]]>
 ]]></echo>
 
   <!-- ADD Document TYPE -->
-
   <antcall target="generatePackageMembers">
     <param name="objtyp"  value="CustomApplication" />
     <param name="objext"  value="app" />
@@ -353,12 +352,47 @@ update uL;]]>
     <param name="objdir"  value="profiles" />
     <param name="objflt"  value="${undeploy.profilePattern}*" /> 
   </antcall>
-  <antcall target="generatePackageMembers">
-    <param name="objtyp"  value="CustomPageWebLink" />
-    <param name="objext"  value="weblink" />
-    <param name="objdir"  value="weblinks" />
-    <param name="objflt"  value="*" />
-  </antcall>
+  
+  
+      <antcall target="generatePackageMembers">
+        <param name="objtyp"  value="CustomPageWebLink" />
+        <param name="objext"  value="weblink" />
+        <param name="objdir"  value="weblinks" />
+        <param name="objflt"  value="*" />
+      </antcall>
+
+
+      <antcall target="generatePackageMembers">
+        <param name="objtyp"  value="Layout" />
+        <param name="objext"  value="layout" />
+        <param name="objdir"  value="layouts" />
+        <param name="objflt"  value="*Opportunity*%*" />
+      </antcall>
+      <antcall target="generatePackageMembers">
+        <param name="objtyp"  value="Layout" />
+        <param name="objext"  value="layout" />
+        <param name="objdir"  value="layouts" />
+        <param name="objflt"  value="*Lead*%*" />
+      </antcall>
+      <antcall target="generatePackageMembers">
+        <param name="objtyp"  value="Layout" />
+        <param name="objext"  value="layout" />
+        <param name="objdir"  value="layouts" />
+        <param name="objflt"  value="*Account*%*" />
+      </antcall>
+      <antcall target="generatePackageMembers">
+        <param name="objtyp"  value="Layout" />
+        <param name="objext"  value="layout" />
+        <param name="objdir"  value="layouts" />
+        <param name="objflt"  value="*Case*%*" />
+      </antcall>
+      <antcall target="generatePackageMembers">
+        <param name="objtyp"  value="Layout" />
+        <param name="objext"  value="layout" />
+        <param name="objdir"  value="layouts" />
+        <param name="objflt"  value="*Contact*%*" />
+      </antcall>
+
 
 
   <antcall target="GeneratePackageMembersStdObjCustomElements2"/>
@@ -367,6 +401,68 @@ update uL;]]>
 </Package>]]></echo>
 
 </target>
+
+
+
+
+<target name="T1">
+<script language="javascript"> 
+<![CDATA[
+
+try {
+
+    var version = java.lang.System.getProperty("java.version");
+    if (version.startsWith("1.8.0")) { load("nashorn:mozilla_compat.js"); }
+    importPackage(java.io);
+    
+    var stage  = project.getProperty('stage.dir');
+    fs = project.createDataType("fileset");
+    fs.setDir( new File("./" + stage + "/labels/") );
+    fs.setIncludes("CustomLabels.labels");
+    fs.setExcludes(".svn");
+    var basedir  = fs.getDir(project);
+    ds = fs.getDirectoryScanner(project);
+    var srcFiles = ds.getIncludedFiles();
+    var strEcho  = '';
+    strEcho+='<types>\n';
+    for (i=0; i<srcFiles.length; i++) {
+        var filename = srcFiles[i];
+        var file = new File(basedir, filename);
+        var b        = false;
+        var br       = new BufferedReader(new InputStreamReader(new DataInputStream(new FileInputStream(file))));
+        while ((line = br.readLine()) != null) {
+            if (line.indexOf('<labels>' ) > -1){b=true ;}
+            if (line.indexOf('</labels>') > -1){b=false;}
+            if (b==true) {
+                if (line.indexOf('<fullName>') > -1) {
+                  strEcho+='<members>'+ line.substring(line.indexOf('<fullName>') + 10,line.indexOf('</fullName>')) + '</members>\n';
+                  b=false;
+                }
+            }
+        }
+    }  
+
+    strEcho+='<name>CustomLabel</name>\n';
+    strEcho+='</types>\n';
+    var file2 = new File('./' + stage + '/deploy/', 'destructiveChanges.xml');
+    echo = project.createTask("echo");
+    echo.setMessage(strEcho);
+    echo.setFile(file2);
+    echo.setAppend(true);
+    echo.perform();
+    strEcho='';
+} catch(e) {}
+
+]]>
+</script>
+</target>
+
+
+
+
+
+
+
 
 
 <target name="generatePackageMembers">
@@ -511,6 +607,7 @@ update uL;]]>
    <script language="javascript"> 
  <![CDATA[
 
+// try {
       var version = java.lang.System.getProperty("java.version");
 	  if (version.startsWith("1.8.0")) {
 	 	load("nashorn:mozilla_compat.js");
@@ -526,8 +623,7 @@ update uL;]]>
       ds = fs.getDirectoryScanner(project);
       var srcFiles = ds.getIncludedFiles();
 
-      for (i=0; i<srcFiles.length; i++) 
-      {
+      for (i=0; i<srcFiles.length; i++) {
       
         var filename = srcFiles[i];
         if( filename == 'SocialPost-Social Post Layout.layout' )
@@ -616,6 +712,7 @@ update uL;]]>
         strEcho='';
       }
 
+// } catch(e) { echo = project.createTask("echo"); echo.setMessage( 'ERROR :: ' + e ); echo.perform(); }
 
   ]]></script>
 </target>
@@ -843,10 +940,10 @@ update uL;]]>
   {
 
       var version = java.lang.System.getProperty("java.version");
-	  if (version.startsWith("1.8.0")) {
-		 load("nashorn:mozilla_compat.js");
-	  }
-	  importPackage(java.io);
+    if (version.startsWith("1.8.0")) {
+     load("nashorn:mozilla_compat.js");
+    }
+    importPackage(java.io);
       var stage  = project.getProperty('stage.dir');
       fs = project.createDataType("fileset");
       fs.setDir( new File("./" + stage + "/labels/") );
@@ -894,5 +991,6 @@ update uL;]]>
 ]]>
 </script>
 </target>
+
 
 </project>
